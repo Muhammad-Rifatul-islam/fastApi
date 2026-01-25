@@ -3,11 +3,10 @@ from fastapi import FastAPI,Depends,HTTPException,status
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from . import models,schemas
+from . import models,schemas,utils
 from .database import engine,Base,get_db
 
 from sqlalchemy.orm import Session
-
 
 
 
@@ -145,6 +144,8 @@ def deleteCourse(id:int,db:Session=Depends(get_db) ):
 @app.post("/users", status_code=status.HTTP_201_CREATED,response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     try:
+        hashed_password=utils.hash_password(user.password)
+        user.password=hashed_password
         # Pydantic object → dict
         data = user.model_dump()
     
