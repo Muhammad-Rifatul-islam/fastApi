@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import FastAPI,Depends,HTTPException,status
 from fastapi.responses import JSONResponse
-
+from sqlalchemy.exc import IntegrityError
 
 from . import models,schemas
 from .database import engine,Base,get_db
@@ -138,3 +138,34 @@ def deleteCourse(id:int,db:Session=Depends(get_db) ):
     status_code=status.HTTP_200_OK,
     content={"message": "Delete Successfully"}
 )
+
+
+#create user
+
+@app.post("/users", status_code=status.HTTP_201_CREATED,response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    try:
+        # Pydantic object → dict
+        data = user.model_dump()
+    
+        new_user = models.User(**data)
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return new_user
+
+    except IntegrityError as e:
+       
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists"
+        )
+
+    except Exception as e:
+       
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {str(e)}"
+        )
