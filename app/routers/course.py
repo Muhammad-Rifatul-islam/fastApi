@@ -9,9 +9,12 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 
 
-router=APIRouter()
+router=APIRouter(
+     prefix="/courses",
+    tags=["Courses"]
+)
 
-@router.post("/courses",response_model=schemas.CourseResponse)
+@router.post("/",response_model=schemas.CourseResponse)
 def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db)):
    new_course=models.Course(
       **course.model_dump() 
@@ -34,12 +37,12 @@ def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db)):
     
 # Get all course
 
-@router.get("/courses",response_model=List[schemas.CourseResponse])
+@router.get("/",response_model=List[schemas.CourseResponse])
 def get_courses(db:Session=Depends(get_db)):
     courses=db.query(models.Course).all()
     return courses
 
-@router.get("/courses/{id}",response_model=schemas.CourseResponse)
+@router.get("/{id}",response_model=schemas.CourseResponse)
 def get_courseByid(id:int,db:Session=Depends(get_db)):
    
    course=db.query(models.Course).filter(models.Course.id==id).first()
@@ -69,7 +72,7 @@ def get_courseByid(id:int,db:Session=Depends(get_db)):
 
 
  # update course      
-@router.put("/courses/{id}",response_model=schemas.CourseResponse)
+@router.put("/{id}",response_model=schemas.CourseResponse)
 def update_course(id: int, update_course: schemas.CreateCourse, db: Session = Depends(get_db)):
     db_course = db.query(models.Course).filter(models.Course.id == id).first()
 
@@ -100,7 +103,7 @@ def update_course(id: int, update_course: schemas.CreateCourse, db: Session = De
     return db_course
     
 
-@router.delete("/course/{id}",status_code=status.HTTP_200_OK)
+@router.delete("/{id}",status_code=status.HTTP_200_OK)
 def deleteCourse(id:int,db:Session=Depends(get_db) ):
    
    course =db.query(models.Course).filter(models.Course.id ==id).first()

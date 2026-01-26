@@ -8,11 +8,14 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 
 
-router=APIRouter()
+router=APIRouter(
+        prefix="/users",
+    tags=["Users"]
+)
 
 #create user
 
-@router.post("/users", status_code=status.HTTP_201_CREATED,response_model=schemas.UserResponse)
+@router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     try:
         hashed_password=utils.hash_password(user.password)
