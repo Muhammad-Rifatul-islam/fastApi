@@ -4,14 +4,16 @@ from sqlalchemy.orm import Session
 from .. import database,schemas,utils,models,oauth2
 from datetime import timedelta
 
+from fastapi.security import OAuth2PasswordRequestForm
+
 router=APIRouter(tags=["Authentication"])
 
 
 
 @router.post("/login")
-def login(userCredential:schemas.UserLogin,db:Session=Depends(database.get_db)):
+def login(userCredential:OAuth2PasswordRequestForm=Depends(),db:Session=Depends(database.get_db)):
 
-    user=db.query(models.User).filter(models.User.email==userCredential.email).first()
+    user=db.query(models.User).filter(models.User.email==userCredential.username).first()
 
     if not user: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Invalid Credential")
