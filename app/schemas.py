@@ -14,6 +14,7 @@ class CreateCourse(BaseModel):
 ## for all field in response 
 class CourseResponse(CreateCourse):
    id:int
+   creator_id:int
    class Config:
       orm_model=True   
 

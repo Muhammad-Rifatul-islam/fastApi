@@ -17,7 +17,7 @@ router=APIRouter(
 @router.post("/",response_model=schemas.CourseResponse)
 def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
    new_course=models.Course(
-      **course.model_dump() 
+      **course.model_dump() ,creator_id=get_current_user
         ##model_dump() → Pydantic object → dict
         #** Dict unpack
    
@@ -36,11 +36,23 @@ def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db),get_curre
    
     
 # Get all course
+@router.get("/", response_model=List[schemas.CourseResponse])
+def get_courses(
+    db: Session = Depends(get_db),
+    get_current_user: int = Depends(oauth2.get_current_user)
+):
+    try:
+        courses = db.query(models.Course).all()
+        # Simply return list, empty list is fine
+        return courses
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Something went wrong: {str(e)}"
+        )
 
-@router.get("/",response_model=List[schemas.CourseResponse])
-def get_courses(db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
-    courses=db.query(models.Course).all()
-    return courses
+
+ #Get  course By ID
 
 @router.get("/{id}",response_model=schemas.CourseResponse)
 def get_courseByid(id:int,db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):

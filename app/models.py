@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column,Integer,Float,String,text
+from sqlalchemy import TIMESTAMP, Column,Integer,Float,String,text,ForeignKey
 from .database import Base
 
 class Course(Base):
@@ -10,6 +10,7 @@ class Course(Base):
     duration=Column(Float,nullable=False)
     instructor=Column(String,nullable=False)
     website=Column(String,nullable=False)
+    creator_id=Column(Integer,ForeignKey("users.id", ondelete="CASCADE"),nullable=False)
 
 
 class User(Base):
