@@ -7,7 +7,7 @@ from app import models, schemas
 from app.database import get_db
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-
+from app import oauth2
 
 router=APIRouter(
      prefix="/courses",
@@ -15,7 +15,7 @@ router=APIRouter(
 )
 
 @router.post("/",response_model=schemas.CourseResponse)
-def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db)):
+def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
    new_course=models.Course(
       **course.model_dump() 
         ##model_dump() → Pydantic object → dict
@@ -38,12 +38,12 @@ def create_post(course:schemas.CreateCourse,db:Session=Depends(get_db)):
 # Get all course
 
 @router.get("/",response_model=List[schemas.CourseResponse])
-def get_courses(db:Session=Depends(get_db)):
+def get_courses(db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
     courses=db.query(models.Course).all()
     return courses
 
 @router.get("/{id}",response_model=schemas.CourseResponse)
-def get_courseByid(id:int,db:Session=Depends(get_db)):
+def get_courseByid(id:int,db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
    
    course=db.query(models.Course).filter(models.Course.id==id).first()
    if not course:
@@ -73,7 +73,7 @@ def get_courseByid(id:int,db:Session=Depends(get_db)):
 
  # update course      
 @router.put("/{id}",response_model=schemas.CourseResponse)
-def update_course(id: int, update_course: schemas.CreateCourse, db: Session = Depends(get_db)):
+def update_course(id: int, update_course: schemas.CreateCourse, db: Session = Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user)):
     db_course = db.query(models.Course).filter(models.Course.id == id).first()
 
     if not db_course:
@@ -104,7 +104,7 @@ def update_course(id: int, update_course: schemas.CreateCourse, db: Session = De
     
 
 @router.delete("/{id}",status_code=status.HTTP_200_OK)
-def deleteCourse(id:int,db:Session=Depends(get_db) ):
+def deleteCourse(id:int,db:Session=Depends(get_db),get_current_user:int=Depends(oauth2.get_current_user) ):
    
    course =db.query(models.Course).filter(models.Course.id ==id).first()
 
